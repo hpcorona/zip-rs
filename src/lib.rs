@@ -4,7 +4,6 @@
 
 extern crate time;
 extern crate flate2;
-extern crate bzip2;
 extern crate podio;
 
 pub use read::ZipArchive;

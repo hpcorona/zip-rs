@@ -13,6 +13,5 @@ Library to support the reading and writing of zip files.
 
 [dependencies]
 flate2 = "0.2"
-bzip2 = "0.2"
 time = "0.1"
 podio = "0.1"

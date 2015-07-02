@@ -9,7 +9,6 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use flate2;
 use flate2::FlateReadExt;
-use bzip2::reader::BzDecompressor;
 use util;
 use podio::{ReadPodExt, LittleEndian};
 use types::ZipFileData;
@@ -51,7 +50,6 @@ pub struct ZipArchive<R: Read + io::Seek>
 enum ZipFileReader<'a> {
     Stored(Crc32Reader<io::Take<&'a mut Read>>),
     Deflated(Crc32Reader<flate2::read::DeflateDecoder<io::Take<&'a mut Read>>>),
-    Bzip2(Crc32Reader<BzDecompressor<io::Take<&'a mut Read>>>),
 }
 
 /// A struct for reading a zip file
@@ -145,13 +143,6 @@ impl<R: Read+io::Seek> ZipArchive<R>
                 let deflate_reader = limit_reader.deflate_decode();
                 ZipFileReader::Deflated(Crc32Reader::new(
                     deflate_reader,
-                    data.crc32))
-            },
-            CompressionMethod::Bzip2 =>
-            {
-                let bzip2_reader = BzDecompressor::new(limit_reader);
-                ZipFileReader::Bzip2(Crc32Reader::new(
-                    bzip2_reader,
                     data.crc32))
             },
             _ => return unsupported_zip_error("Compression method not supported"),
@@ -272,7 +263,6 @@ impl<'a> ZipFile<'a> {
         match self.reader {
            ZipFileReader::Stored(ref mut r) => r as &mut Read,
            ZipFileReader::Deflated(ref mut r) => r as &mut Read,
-           ZipFileReader::Bzip2(ref mut r) => r as &mut Read,
         }
     }
     /// Get the name of the file

@@ -8,8 +8,6 @@ pub enum CompressionMethod
     Stored,
     /// The file is Deflated
     Deflated,
-    /// File is compressed using BZIP2 algorithm
-    Bzip2,
     /// Unsupported compression method
     Unsupported(u16),
 }
@@ -20,7 +18,6 @@ impl CompressionMethod {
         match val {
             0 => CompressionMethod::Stored,
             8 => CompressionMethod::Deflated,
-            12 => CompressionMethod::Bzip2,
             v => CompressionMethod::Unsupported(v),
         }
     }
@@ -30,7 +27,6 @@ impl CompressionMethod {
         match self {
             CompressionMethod::Stored => 0,
             CompressionMethod::Deflated => 8,
-            CompressionMethod::Bzip2 => 12,
             CompressionMethod::Unsupported(v) => v,
         }
     }
@@ -61,6 +57,5 @@ mod test {
 
         check_match(CompressionMethod::Stored);
         check_match(CompressionMethod::Deflated);
-        check_match(CompressionMethod::Bzip2);
     }
 }
