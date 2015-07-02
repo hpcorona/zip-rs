@@ -37,7 +37,7 @@ fn doit(filename: &str) -> zip::result::ZipResult<()>
     try!(zip.start_file("test/☃.txt", zip::CompressionMethod::Stored));
     try!(zip.write_all(b"Hello, World!\n"));
 
-    try!(zip.start_file("test/lorem_ipsum.txt", zip::CompressionMethod::Deflated));
+    try!(zip.start_file("test/lorem_ipsum.txt", zip::CompressionMethod::Stored));
     try!(zip.write_all(LOREM_IPSUM));
 
     try!(zip.finish());

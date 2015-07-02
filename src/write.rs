@@ -11,9 +11,6 @@ use std::io::prelude::*;
 use std::mem;
 use std::ascii::AsciiExt;
 use time;
-use flate2;
-use flate2::FlateWriteExt;
-use flate2::write::DeflateEncoder;
 use util;
 use podio::{WritePodExt, LittleEndian};
 
@@ -21,7 +18,6 @@ enum GenericZipWriter<W: Write + io::Seek>
 {
     Closed,
     Storer(W),
-    Deflater(DeflateEncoder<W>),
 }
 
 /// Generator for ZIP files.
@@ -237,14 +233,12 @@ impl<W: Write+io::Seek> GenericZipWriter<W>
         let bare = match mem::replace(self, GenericZipWriter::Closed)
         {
             GenericZipWriter::Storer(w) => w,
-            GenericZipWriter::Deflater(w) => try!(w.finish()),
             GenericZipWriter::Closed => try!(Err(io::Error::new(io::ErrorKind::BrokenPipe, "ZipWriter was already closed"))),
         };
 
         *self = match compression
         {
             CompressionMethod::Stored => GenericZipWriter::Storer(bare),
-            CompressionMethod::Deflated => GenericZipWriter::Deflater(bare.deflate_encode(flate2::Compression::Default)),
             CompressionMethod::Unsupported(..) => return Err(ZipError::UnsupportedArchive("Unsupported compression")),
         };
 
@@ -254,7 +248,6 @@ impl<W: Write+io::Seek> GenericZipWriter<W>
     fn ref_mut(&mut self) -> Option<&mut Write> {
         match *self {
             GenericZipWriter::Storer(ref mut w) => Some(w as &mut Write),
-            GenericZipWriter::Deflater(ref mut w) => Some(w as &mut Write),
             GenericZipWriter::Closed => None,
         }
     }
@@ -280,7 +273,6 @@ impl<W: Write+io::Seek> GenericZipWriter<W>
     fn current_compression(&self) -> Option<CompressionMethod> {
         match *self {
             GenericZipWriter::Storer(..) => Some(CompressionMethod::Stored),
-            GenericZipWriter::Deflater(..) => Some(CompressionMethod::Deflated),
             GenericZipWriter::Closed => None,
         }
     }

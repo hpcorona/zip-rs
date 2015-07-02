@@ -6,8 +6,6 @@ pub enum CompressionMethod
 {
     /// The file is stored (no compression)
     Stored,
-    /// The file is Deflated
-    Deflated,
     /// Unsupported compression method
     Unsupported(u16),
 }
@@ -17,7 +15,6 @@ impl CompressionMethod {
     pub fn from_u16(val: u16) -> CompressionMethod {
         match val {
             0 => CompressionMethod::Stored,
-            8 => CompressionMethod::Deflated,
             v => CompressionMethod::Unsupported(v),
         }
     }
@@ -26,7 +23,6 @@ impl CompressionMethod {
     pub fn to_u16(self) -> u16 {
         match self {
             CompressionMethod::Stored => 0,
-            CompressionMethod::Deflated => 8,
             CompressionMethod::Unsupported(v) => v,
         }
     }
@@ -56,6 +52,5 @@ mod test {
         }
 
         check_match(CompressionMethod::Stored);
-        check_match(CompressionMethod::Deflated);
     }
 }
