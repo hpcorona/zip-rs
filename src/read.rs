@@ -75,7 +75,7 @@ impl<R: Read+io::Seek> ZipArchive<R>
         let mut names_map = HashMap::new();
 
         try!(reader.seek(io::SeekFrom::Start(directory_start)));
-        for _ in (0 .. number_of_files)
+        for _ in 0 .. number_of_files
         {
             let file = try!(central_header_to_zip_file(&mut reader));
             names_map.insert(file.file_name.clone(), files.len());
@@ -176,9 +176,9 @@ fn central_header_to_zip_file<R: Read+io::Seek>(reader: &mut R) -> ZipResult<Zip
     try!(reader.read_u16::<LittleEndian>());
     try!(reader.read_u32::<LittleEndian>());
     let offset = try!(reader.read_u32::<LittleEndian>()) as u64;
-    let file_name_raw = try!(reader.read_exact(file_name_length));
-    let extra_field = try!(reader.read_exact(extra_field_length));
-    let file_comment_raw  = try!(reader.read_exact(file_comment_length));
+    let file_name_raw = try!(ReadPodExt::read_exact(reader, file_name_length));
+    let extra_field = try!(ReadPodExt::read_exact(reader, extra_field_length));
+    let file_comment_raw  = try!(ReadPodExt::read_exact(reader, file_comment_length));
 
     let file_name = match is_utf8
     {
